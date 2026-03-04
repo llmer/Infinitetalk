@@ -1,7 +1,7 @@
 # InfiniteTalk for RunPod Serverless
 [한국어 README 보기](README_kr.md)
 
-This project is a template designed to easily deploy and use [InfiniteTalk](https://github.com/Kijai/InfiniteTalk) in the RunPod Serverless environment.
+This project is a template designed to easily deploy and use [InfiniteTalk](https://github.com/llmer/InfiniteTalk) in the RunPod Serverless environment.
 
 [![Runpod](https://api.runpod.io/badge/llmer/Infinitetalk_Runpod_hub)](https://console.runpod.io/hub/llmer/Infinitetalk_Runpod_hub)
 
