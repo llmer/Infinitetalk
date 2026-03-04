@@ -163,7 +163,7 @@ def get_history(prompt_id):
         return json.loads(response.read())
 
 
-def get_videos(ws, prompt, input_type="image", person_count="single"):
+def get_videos(ws, prompt, input_type="image", person_count="single", job=None):
     prompt_id = queue_prompt(prompt, input_type, person_count)["prompt_id"]
     logger.info(f"워크플로우 실행 시작: prompt_id={prompt_id}")
 
@@ -176,6 +176,8 @@ def get_videos(ws, prompt, input_type="image", person_count="single"):
                 data = message["data"]
                 if data["node"] is not None:
                     logger.info(f"노드 실행 중: {data['node']}")
+                    if job:
+                        runpod.serverless.progress_update(job, f"Executing node: {data['node']}")
                 if data["node"] is None and data["prompt_id"] == prompt_id:
                     logger.info("워크플로우 실행 완료")
                     break
@@ -480,6 +482,7 @@ def handler(job):
             if "313" in prompt:
                 prompt["313"]["inputs"]["audio"] = wav_path_2
 
+    runpod.serverless.progress_update(job, "Connecting to ComfyUI...")
     ws_url = f"ws://{server_address}:8188/ws?clientId={client_id}"
     logger.info(f"Connecting to WebSocket: {ws_url}")
 
@@ -521,7 +524,7 @@ def handler(job):
             if attempt == max_attempts - 1:
                 raise Exception("웹소켓 연결 시간 초과 (3분)")
             time.sleep(5)
-    videos = get_videos(ws, prompt, input_type, person_count)
+    videos = get_videos(ws, prompt, input_type, person_count, job=job)
     ws.close()
     logger.info("웹소켓 연결 종료")
 
@@ -588,6 +591,7 @@ def handler(job):
             return {"error": f"비디오 복사 실패: {e}"}
     else:
         # 네트워크 볼륨 미사용: Base64 인코딩하여 반환
+        runpod.serverless.progress_update(job, "Encoding video output...")
         logger.info("Base64 인코딩 시작")
         logger.info(f"비디오 파일 경로: {output_video_path}")
 
