@@ -168,6 +168,12 @@ def get_videos(ws, prompt, input_type="image", person_count="single", job=None):
                 if data["node"] is None and data["prompt_id"] == prompt_id:
                     logger.info("Workflow execution complete")
                     break
+            elif message["type"] == "progress":
+                data = message["data"]
+                if job:
+                    runpod.serverless.progress_update(
+                        job, f"Node {data.get('node', '?')}: {data['value']}/{data['max']}"
+                    )
         else:
             continue
 
