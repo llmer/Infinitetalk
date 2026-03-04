@@ -14,7 +14,17 @@ RUN wget -q https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/
     wget -q https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-fp8_e4m3fn.safetensors -O /models/text_encoders/umt5-xxl-enc-fp8_e4m3fn.safetensors & \
     wget -q https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors -O /models/clip_vision/clip_vision_h.safetensors & \
     wget -q https://huggingface.co/Kijai/MelBandRoFormer_comfy/resolve/main/MelBandRoformer_fp16.safetensors -O /models/diffusion_models/MelBandRoformer_fp16.safetensors & \
-    wait
+    wait && \
+    for f in \
+      /models/diffusion_models/Wan2_1-InfiniteTalk-Single_fp8_e4m3fn_scaled_KJ.safetensors \
+      /models/diffusion_models/Wan2_1-InfiniteTalk-Multi_fp8_e4m3fn_scaled_KJ.safetensors \
+      /models/diffusion_models/Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors \
+      /models/loras/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors \
+      /models/vae/Wan2_1_VAE_bf16.safetensors \
+      /models/text_encoders/umt5-xxl-enc-fp8_e4m3fn.safetensors \
+      /models/clip_vision/clip_vision_h.safetensors \
+      /models/diffusion_models/MelBandRoformer_fp16.safetensors; \
+    do [ -s "$f" ] || { echo "FAILED: $f is missing or empty"; exit 1; }; done
 
 # Stage 2: Build runtime with ComfyUI + custom nodes
 FROM wlsdml1114/engui_genai-base_blackwell:1.1 AS runtime
