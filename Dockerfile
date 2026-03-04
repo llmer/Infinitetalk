@@ -1,6 +1,6 @@
 # Stage 1: Download models in parallel (runs concurrently with stage 2 via BuildKit)
 FROM debian:bookworm-slim AS models
-RUN apt-get update && apt-get install -y --no-install-recommends wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /models/diffusion_models /models/loras /models/vae /models/text_encoders /models/clip_vision
 # Commented-out GGUF models preserved for reference
 # wget -q https://huggingface.co/Kijai/WanVideo_comfy_GGUF/resolve/main/InfiniteTalk/Wan2_1-InfiniteTalk_Single_Q8.gguf -O /models/diffusion_models/Wan2_1-InfiniteTalk_Single_Q8.gguf
