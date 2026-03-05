@@ -146,7 +146,7 @@ def get_image(filename, subfolder, folder_type):
 def get_history(prompt_id):
     url = f"http://{server_address}:8188/history/{prompt_id}"
     logger.info(f"Getting history from: {url}")
-    with urllib.request.urlopen(url) as response:
+    with urllib.request.urlopen(url, timeout=30) as response:
         return json.loads(response.read())
 
 
@@ -156,7 +156,14 @@ def get_videos(ws, prompt, input_type="image", person_count="single", job=None):
 
     output_videos = {}
     while True:
-        out = ws.recv()
+        try:
+            out = ws.recv()
+        except websocket.WebSocketTimeoutException:
+            logger.error("WebSocket recv timed out (120s) — ComfyUI may be unresponsive")
+            raise Exception("WebSocket timeout: no message from ComfyUI for 120 seconds")
+        except (websocket.WebSocketConnectionClosedException, ConnectionError) as e:
+            logger.error(f"WebSocket disconnected: {e}")
+            raise Exception(f"WebSocket disconnected: {e}")
         if isinstance(out, str):
             message = json.loads(out)
             if message["type"] == "executing":
@@ -174,6 +181,11 @@ def get_videos(ws, prompt, input_type="image", person_count="single", job=None):
                     runpod.serverless.progress_update(
                         job, f"Node {data.get('node', '?')}: {data['value']}/{data['max']}"
                     )
+            elif message["type"] == "execution_error":
+                error_data = message.get("data", {})
+                error_msg = f"ComfyUI execution error: {error_data}"
+                logger.error(error_msg)
+                raise Exception(error_msg)
         else:
             continue
 
@@ -456,6 +468,7 @@ def handler(job):
 
         try:
             ws.connect(ws_url)
+            ws.settimeout(120)
             logger.info(f"WebSocket connected (attempt {attempt+1})")
             break
         except Exception as e:
