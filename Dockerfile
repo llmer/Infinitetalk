@@ -44,23 +44,27 @@ WORKDIR /
 
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git && \
     cd /ComfyUI && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip uninstall -y comfyui-frontend-package comfyui-workflow-templates \
+        comfyui-workflow-templates-core comfyui-workflow-templates-media-api \
+        comfyui-workflow-templates-media-image comfyui-workflow-templates-media-other \
+        comfyui-workflow-templates-media-video comfyui-embedded-docs 2>/dev/null || true
 
 RUN cd /ComfyUI/custom_nodes && \
-    git clone https://github.com/Comfy-Org/ComfyUI-Manager.git && \
     git clone https://github.com/city96/ComfyUI-GGUF && \
     git clone https://github.com/kijai/ComfyUI-KJNodes && \
     git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite && \
     git clone https://github.com/orssorbit/ComfyUI-wanBlockswap && \
     git clone https://github.com/kijai/ComfyUI-MelBandRoFormer && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper && \
-    cd ComfyUI-Manager && pip install --no-cache-dir -r requirements.txt && \
-    cd ../ComfyUI-GGUF && pip install --no-cache-dir -r requirements.txt && \
+    cd ComfyUI-GGUF && pip install --no-cache-dir -r requirements.txt && \
     cd ../ComfyUI-KJNodes && pip install --no-cache-dir -r requirements.txt && \
     cd ../ComfyUI-VideoHelperSuite && pip install --no-cache-dir -r requirements.txt && \
     cd ../ComfyUI-MelBandRoFormer && pip install --no-cache-dir -r requirements.txt && \
     cd ../ComfyUI-WanVideoWrapper && pip install --no-cache-dir -r requirements.txt && \
-    find /ComfyUI -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true
+    find /ComfyUI -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /ComfyUI -name "*.pyc" -delete 2>/dev/null || true && \
+    find /ComfyUI -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 
 COPY . .
 RUN chmod +x /entrypoint.sh
